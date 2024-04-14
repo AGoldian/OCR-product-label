@@ -10,6 +10,7 @@ sys.path.append('OCR-product-label')
 import io
 from PIL import Image
 from models.utils import preprocessing_image
+import uuid
 
 
 # download weights model
@@ -33,8 +34,10 @@ async def analyze_image(data: Data):
         image = Image.open(io.BytesIO(image_data))
         image.save(output_path, "PNG")
 
-    save_base64_to_png(data.file, 'jopa.png')
-    res = preprocessing_image('jopa.png')
+
+    filename = uuid.uuid4()
+    save_base64_to_png(data.file, f'{filename}.png')
+    res = preprocessing_image(f'{filename}.png')
 
     return JSONResponse(content={
         'productName': 'Овсянка, сэр',
