@@ -3,18 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-
-import '../../domain/product.dart';
-
-class ToImageData {
-  static String imageToData(String imagePath) {
-    final extension = imagePath.substring(imagePath.lastIndexOf('.'));
-    final bytes = File(imagePath).readAsBytesSync();
-    String base64 =
-        "data:image/${extension.replaceAll(".", "")};base64,${base64Encode(bytes)}";
-    return base64;
-  }
-}
+import 'package:proriv_case/domain/product.dart';
 
 class WebApi {
   static const _base =
@@ -22,7 +11,9 @@ class WebApi {
   final _dio = Dio();
 
   Future<Product> checkImage(String path) async {
-    final data = ToImageData.imageToData(path);
+    final data = base64Encode(
+      File(path).readAsBytesSync(),
+    );
 
     final response = await _dio.post(
       '$_base/analyze-image',
