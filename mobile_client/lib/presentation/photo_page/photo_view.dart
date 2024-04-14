@@ -6,24 +6,39 @@ import 'package:proriv_case/di/singletones.dart';
 import 'package:proriv_case/presentation/common/hint_card.dart';
 import 'package:proriv_case/presentation/common/styles.dart';
 
-class PhotoView extends StatelessWidget {
+class PhotoView extends StatefulWidget {
   final picker = ImagePicker();
 
   PhotoView({
     super.key,
   });
 
+  @override
+  State<StatefulWidget> createState() => _PhotoView();
+}
+
+class _PhotoView extends State<PhotoView> {
+  bool isLoading = false;
+
   Future<void> loadPhoto(BuildContext context, ImageSource source) async {
-    final image = await picker.pickImage(source: source);
+    setState(() {
+      isLoading = true;
+    });
+    final image = await widget.picker.pickImage(source: source);
     if (image != null) {
       try {
         final res = await webApi.checkImage(image.path);
         log('checked image: $res');
-        Navigator.of(context).pop(res);
+        if (mounted) {
+          Navigator.of(context).pop(res);
+        }
       } catch (e) {
         log('Error on checking image: $e');
       }
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -42,107 +57,121 @@ class PhotoView extends StatelessWidget {
           ),
         ),
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: bgGradient,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Column(
-          children: [
-            Text(
-              'Вот несколько полезных советов, чтобы проверка сработала быстрее:',
-              style: textTheme.bodyLarge!
-                  .copyWith(color: textMain, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.start,
+      body: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: bgGradient,
             ),
-            const SizedBox(
-              height: 12,
-            ),
-            const HintCard(
-              title: 'Товар должен находиться напротив камеры и не бличить',
-            ),
-            const HintCard(
-              title: 'На фотографию должна попасть этикетка полностью',
-            ),
-            const HintCard(
-              title: 'Продукт должен занимать не меньше 80% изображения',
-            ),
-            const Expanded(child: SizedBox()),
-            MaterialButton(
-              onPressed: () => loadPhoto(context, ImageSource.camera),
-              color: pinkMain,
-              minWidth: double.infinity,
-              height: 56,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.camera_alt,
-                    color: textMain,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Column(
+              children: [
+                Text(
+                  'Вот несколько полезных советов, чтобы проверка сработала быстрее:',
+                  style: textTheme.bodyLarge!
+                      .copyWith(color: textMain, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.start,
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                const HintCard(
+                  title: 'Товар должен находиться напротив камеры и не бличить',
+                ),
+                const HintCard(
+                  title: 'На фотографию должна попасть этикетка полностью',
+                ),
+                const HintCard(
+                  title: 'Продукт должен занимать не меньше 80% изображения',
+                ),
+                const Expanded(child: SizedBox()),
+                MaterialButton(
+                  onPressed: () => loadPhoto(context, ImageSource.camera),
+                  color: pinkMain,
+                  minWidth: double.infinity,
+                  height: 56,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
                   ),
-                  Expanded(
-                    child: Text(
-                      'Сфотографировать',
-                      style: textTheme.bodyLarge!.copyWith(
-                        fontWeight: FontWeight.w500,
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.camera_alt,
                         color: textMain,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
+                      Expanded(
+                        child: Text(
+                          'Сфотографировать',
+                          style: textTheme.bodyLarge!.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: textMain,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const Opacity(
+                        opacity: 0,
+                        child: Icon(
+                          Icons.camera_alt,
+                          color: textMain,
+                        ),
+                      ),
+                    ],
                   ),
-                  const Opacity(
-                    opacity: 0,
-                    child: Icon(
-                      Icons.camera_alt,
-                      color: textMain,
-                    ),
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                MaterialButton(
+                  onPressed: () => loadPhoto(context, ImageSource.gallery),
+                  color: greenMain,
+                  minWidth: double.infinity,
+                  height: 56,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            MaterialButton(
-              onPressed: () => loadPhoto(context, ImageSource.gallery),
-              color: greenMain,
-              minWidth: double.infinity,
-              height: 56,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.collections,
-                    color: textInverted,
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Выбрать из галлереи',
-                      style: textTheme.bodyLarge!.copyWith(
-                        fontWeight: FontWeight.w500,
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.collections,
                         color: textInverted,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
+                      Expanded(
+                        child: Text(
+                          'Выбрать из галлереи',
+                          style: textTheme.bodyLarge!.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: textInverted,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const Opacity(
+                        opacity: 0,
+                        child: Icon(
+                          Icons.camera_alt,
+                          color: textInverted,
+                        ),
+                      ),
+                    ],
                   ),
-                  const Opacity(
-                    opacity: 0,
-                    child: Icon(
-                      Icons.camera_alt,
-                      color: textInverted,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          if (isLoading)
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.grey.withOpacity(0.5),
+            ),
+          if (isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+        ],
       ),
     );
   }
