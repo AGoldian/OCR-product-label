@@ -8,5 +8,23 @@
 
 Помимо проверки маркировки, мы предлагаем подробные комментарии о критериях несоответствия и аналитический дашборд с историей.
 
-# Установка
+# Локальное развертывание
+Клонируем репозиторий
 - `git clone https://github.com/AGoldian/OCR-product-label`
+
+<a href="https://docs.flutter.dev/get-started/install">Устанавливаем Flutter</a>
+
+Создаем виртуальное окружение и запускаем сервер
+```bash
+pip install virtualenv
+source /usr/bin/python3
+cd rest_api
+python3 -m uvicorn main:app --reload
+```
+
+Собираем и запускаем Flutter-приложение:
+```bash
+cd mobile_client
+flutter pub get
+flutter run
+```
