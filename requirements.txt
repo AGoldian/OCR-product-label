@@ -1,0 +1,9 @@
+fastapi~=0.110.1
+cachetools~=5.3.3
+requests
+python-multipart
+uvicorn
+fastapi_storages
+pillow
+easyocr
+albumentations
