@@ -84,21 +84,11 @@ def llm_work(ocr_text):
     promt_level_two = """
     У тебя есть требования к продукту {data_dict[max(category_numbers)]}
     Необходимо проверить соответствует ли маркировка: {ocr_text} этим требованиям.
-    Выведи ответ в формате json:
+    Выведи ответ только в формате json, Если нет информация об пункте напиши NaN:
     { 
     correct_flag - binary (соответствует ли маркировка требованиям)
     comments - str (почему не соответствует требованиям),
-    Энергетическая ценность (ккал/100 г),
-    Натрий (мг/ 100 ккал)",
-    Общий сахар (% Е),
-    Добавленные свободные сахара или подсластитель,
-    Общий белок (г/100ккал) и вес белка,
-    Общее количество жиров (г/100ккал) (без транс-жиров),
-    Содержание фруктов (% веса),
-    Возрастная маркировка (месяцы),
-    Указание высокого содержания сахара на лицевой стороне упаковки (% калорий).
     }
-    Если нет информация об пункте напиши NaN
     """
 
     messages = [
@@ -108,11 +98,13 @@ def llm_work(ocr_text):
     encodeds = tokenizer.apply_chat_template(messages, return_tensors="pt")
 
     model_inputs = encodeds.to(device)
-    # model.to(device)
 
     generated_ids = model.generate(model_inputs, max_new_tokens=300, do_sample=True)
     decoded = tokenizer.batch_decode(generated_ids)
     result = decoded[0].split("[/INST]")[1]
+    json_result = json.loads(result)
+
+    return json_result
 
 
 if __name__ == "__main__":
