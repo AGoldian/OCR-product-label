@@ -4,7 +4,7 @@ from albumentations.pytorch import ToTensorV2
 import numpy as np
 from PIL import Image
 import easyocr
-from dicts import category_product
+from models.dicts import category_product
 import re
 import json
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -76,35 +76,48 @@ def llm_work(ocr_text):
     decoded = tokenizer.batch_decode(generated_ids)
 
     category_numbers = re.findall('(\d.\d)|\d', decoded[0].split("[/INST]")[1])
-    file_path = 'product_reqs.json'
+    file_path = 'models/product_reqs.json'
 
     with open(file_path, 'r', encoding='utf-8') as file:
         data_dict = json.load(file)
 
-    promt_level_two = """
+    promt_flag_value = """
     У тебя есть требования к продукту {data_dict[max(category_numbers)]}
     Необходимо проверить соответствует ли маркировка: {ocr_text} этим требованиям.
-    Выведи ответ только в формате json, Если нет информация об пункте напиши NaN:
-    { 
-    correct_flag - binary (соответствует ли маркировка требованиям)
-    comments - str (почему не соответствует требованиям),
-    }
+    Выведи бинарный ответ 0 или 1.
     """
 
-    messages = [
-        {"role": "user", "content": promt_level_two}
+    promt_comments_value =  """
+    У тебя есть требования к продукту {data_dict[max(category_numbers)]}
+    Необходимо проверить соответствует ли маркировка: {ocr_text} этим требованиям и напиши комментарий: совпадает или нет."""
+
+    messages_1 = [
+        {"role": "user", "content": promt_flag_value}
+    ]
+    messages_2 = [
+        {"role": "user", "content": promt_comments_value}
     ]
 
-    encodeds = tokenizer.apply_chat_template(messages, return_tensors="pt")
+    encodeds_1 = tokenizer.apply_chat_template(messages_1, return_tensors="pt")
+    encodeds_2 = tokenizer.apply_chat_template(messages_2, return_tensors="pt")
 
-    model_inputs = encodeds.to(device)
+    model_inputs_1 = encodeds_1.to(device)
+    model_inputs_2 = encodeds_2.to(device)
 
-    generated_ids = model.generate(model_inputs, max_new_tokens=300, do_sample=True)
-    decoded = tokenizer.batch_decode(generated_ids)
-    result = decoded[0].split("[/INST]")[1]
-    json_result = json.loads(result)
+    generated_ids_1 = model.generate(model_inputs_1, max_new_tokens=10, do_sample=True)
+    generated_ids_2 = model.generate(model_inputs_2, max_new_tokens=250, do_sample=True)
+    decoded_1 = tokenizer.batch_decode(generated_ids_1)
+    decoded_2 = tokenizer.batch_decode(generated_ids_2)
 
-    return json_result
+    result_1 = decoded_1[0].split("[/INST]")[1]
+    result_2 = decoded_2[0].split("[/INST]")[1]
+
+    if ('1' in result_1) or ("True" in result_1):
+       result_1 = True 
+    else:
+       result_1 = False
+    # json_result = json.dumps({"correct_flag": result_1, "comments": result_2}, ensure_ascii=False)
+    return {"correct_flag": result_1, "comments": result_2}
 
 
 if __name__ == "__main__":
