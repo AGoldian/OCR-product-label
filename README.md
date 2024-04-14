@@ -34,7 +34,7 @@ flutter run
 # Скриншоты
 
 <div class="row">
-    <img src="https://github.com/AGoldian/OCR-product-label/screenshots/empty_main.jpg" height="120"/>
-    <img src="https://github.com/AGoldian/OCR-product-label/screenshots/add_image.jpg" height="120"/>
-    <img src="https://github.com/AGoldian/OCR-product-label/screenshots/items_list.jpg" height="120"/>
+    <img src="https://raw.githubusercontent.com/AGoldian/OCR-product-label/safe-commit/screenshots/empty_main.jpg" height="120"/>
+    <img src="https://raw.githubusercontent.com/AGoldian/OCR-product-label/safe-commit/screenshots/add_image.jpg" height="120"/>
+    <img src="https://raw.githubusercontent.com/AGoldian/OCR-product-label/safe-commit/screenshots/items_list.jpg" height="120"/>
 </div>
